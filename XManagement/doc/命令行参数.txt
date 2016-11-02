@@ -1,0 +1,6 @@
+﻿[XManagement]
+命令行：
+	XManagement.exe [/noinifile]
+参数说明：
+	/noinifile	启动时不载入ini配置文件
+

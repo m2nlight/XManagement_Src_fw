@@ -1,0 +1,102 @@
+﻿说明：画“※”号的为重要。“*”表示已经变更。“?”为待完成。“[※※]”为注意。
+
+
+[2010年7月23日]
+1.为调试输出类Shell增加输出到文件功能
+  a.为Shell.OutputFile属性指定一个有效的文件名，则每次用WriteLine输出信息同时会写入到这个文件。
+    否则只是显示在控制台上。
+  b.如果写入文件时产生错误，会在控制台收到一条“写入调试信息到文件失败”的信息，并取消写入到文件功能
+    用Shell.HasOutputFile属性判断是否为取消状态。
+    除非重新指定Shell.OutputFile属性，否则HasOutputFile会一直为false而不会写入文件。
+  c.用Shell.WriteLineWithoutFile方法输出的信息永远不会写入到文件。
+    这样的信息会在行首处以“@”开始，以区别WriteLine的输出方法。
+  d.用Shell.ReadLine()方法读输入数据流。
+2.在Configuration的静态构造里，设置了Shell信息输出功能，输出目录是shell.log文件夹。
+3.调试主程序结束，按回车键关闭控制台窗口，退出整个程序。
+
+
+[2010年7月22日]
+1.主窗口MainForm
+  a.更改为MDI容器窗口，dockPanel1的访问权限重置为private
+  b.添加MDI主窗口功能扩展
+    1)通过DockPanel属性可得到dockPanel1的引用
+    2)通过DocumentWindows属性可得到所有文档类型窗口的可枚举集合
+    3)通过CloseAllDocumentFormsExcept方法关闭除指定的文档类型窗口外的其他文档窗口
+    4)通过ActiviteMdiChild方法激活某个文档窗口
+    5)通过ShowMdiChild方法显示某个文档窗口
+2.添加DocumentWindow和ToolWindow窗口类
+  a.DocumentWindow作为全部文档窗口的父类
+  b.ToolWindow窗口类作为全部工具窗口的父类
+  c.它们继承了DockContent，填写了基本功能
+3.添加DialogForm窗口类
+  a.可以通过此类的ApplyDialogStyle方法得到对话框风格窗口
+  b.也可以继承此类得到对话框风格的窗口，建议使用上一种方法
+4.添加Security文件夹
+  DesEncryptor.cs提供一些带盐的加密解密算法
+5.添加MyExtendMethod类
+  a.提供一些扩展方法。
+  b.例如：
+    1)IsEquals比较两个数组是否相同
+    2)FilterIt为字符串过滤掉一些字符
+    3)DesEncrypt用指定的key加密一个字符串
+    4)DesDecrypt用指定的key解密一个字符串
+    5)SplitIt将一个字符串按分隔符分隔成字符串数组
+    6)MergeIt将一个字符串数组按指定分隔符合并为一个字符串
+    7)ToMulitLineString将一个IList<string>转换成多行字符串
+    8)FormatTimeSpan格式化TimeSpan为时分秒的中文格式
+    9)FormatFileSizeWithoutUnit格式化表示文件大小的long型数据，返回结果不带有单位后缀
+    10)FormatFileSize格式化表示文件大小的long型数据
+6.添加DockPanel的序列化到磁盘功能
+  当主窗口关闭时会根据配置保存布局文件为“程序名.layout”。
+  在主窗口启动时会读取它，显示上次保存的窗口布局，若无法载入布局文件，则从资源中读取layout.xml
+
+
+[2010年7月21日]
+1.程序启动时创建保存日志文件的log文件夹
+2.对Utility文件夹下的文件代码做规范化和调整
+3.排除代码中存在的所有警告和错误
+  a.为不符合CLS规范且必须使用的代码加入[CLSCompliantAttribute(false)]属性
+4.在Debug模式下，程序启动时会分配控制台窗口，以便显示调试信息，程序退出时关闭控制台窗口
+  不会影响Release版本
+5.增强异常捕获能力
+  a.可以调用StartProgram.Crash方法模仿异常关闭程序，记录日志。
+    由于异常可能产生于辅助线程中，我们使辅助线程的异常允许用户忽略，因为此操作没有采用真正抛出异常的方式。
+  b.日志信息会报告操作环境的详细资料
+    添加SystemInfo类，通过SystemInfo.GetSystemInfo()方法得到系统相关信息
+
+
+[2010年7月20日]
+1.添加公共静态类 Configuration，它包含系统的静态配置信息
+2.添加IO文件夹（命名空间）
+  a.配置文件INI读写类IniFile  ---- 系统在Windows下使用
+  b.调试交互类Shell
+3.添加启动程序时需要执行的操作类 StartProgram
+  a.命令行参数分析
+  b.启动程序，显示主窗口
+  c.在\doc目录添加“命令行参数.txt”文件
+4.添加PInvoke.cs文件，其中存放大部分系统API的声明
+5.添加Utility文件夹
+  FileUtility - 提供文件IO相关的函数
+  GraphicsUtility - 提供图像处理的相关函数
+  GuiUtility - 提供界面UI处理的相关函数
+  RegexUtility - 提供正则运算的相关函数
+6.主窗口会按ini配置文件的设置显示，关闭时保存配置信息
+7.程序启动时间记录在Configuration.VarStartTime属性里
+  产生的日志文件会创建在log目录下名为“程序名.日期时间.log”的文件
+
+
+[2010年7月19日]
+1.创建XManagement解决方案。创建目录结构，添加全局程序集信息文件GlobalAssemblyInfo.cs。
+2.创建XManagement项目。
+  a.XManagement的主窗口MainForm.cs
+  b.dockPanel1控件
+3.额外项目
+  a.添加DockPanel 2.3.1项目（WeifenLuo.WinFormsUI.Docking），用于生成DockPanel相关组件；
+  b.添加SharpZipLib 0.86项目（ICSharpCode.SharpZLib），用于生成支持Zip\GZip\Tar\BZip2压缩和解压缩的库。
+
+
+
+
+------------------注意------------------
+[※※]
+1.解决方案的管理信息阅读first.txt文件

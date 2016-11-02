@@ -1,0 +1,233 @@
+﻿XManagement解决方案
+
+
+[索引]
+一、环境要求
+二、目录结构
+三、添加新项目或文件
+四、程序集信息
+五、修改项目命名空间和输出路径
+六、修改解决方案输出文件的产品名、版本等信息
+七、文件编码
+八、公共变量
+九、调试输出
+十、程序启动和命令行参数
+十一、手动杀死程序
+十二、窗口风格
+十三、实用工具类、扩展方法、子命名空间
+
+
+[一、环境要求]
+.NET Framework 3.5 SP1
+SQL Server 2005
+ReportViewer 9.0
+Microsoft Windows Installer 3.1或更高（若系统无较新版本的安装器将无法安装.NET Framework 3.5 SP1）
+
+
+[二、目录结构]
+\		根目录：包含解决方案文件，调试版本编译、释放版本编译及清理项目的批处理文件。
+\bin	编译输出目录：主项目的输出文件指向这个目录。
+\doc	文档目录：存放所有的说明文档文件。工作日志文件以“log_”开头。
+\lib	引用库目录：需要外部的引用库文件存放在这里。供项目引用。
+\proj	项目目录：所有项目源文件。GlobalAssemblyInfo.cs包含产品发布版本等信息，项目需要引用它。
+\res	需要解决方案保留的资源。如合成图形的PSD文件等。
+
+
+[三、添加新项目或文件]
+1)创建项目
+  在VS中，为解决方案创建新项目或文件，然后将其从解决方案中移除。
+  右键“解决方案”->“在Windows资源管理器中打开文件夹”，定位到创建的新项目或文件。
+2)移到项目
+  用Windows资源管理器，将项目移到到proj目录下，如果是文档文件则移到到doc目录下。
+3)添加项目
+  在VS中，右键解决方案管理器的proj文件夹或者doc文件夹->“添加”->“现有项目”或者“现有项”
+  浏览到项目或文件，添加它。
+
+※注意：新的项目创建完成后，完成下面第四点和第五点操作，修改新项目的程序集信息、命名空间以及输出目录。
+
+
+[四、程序集信息]
+1)编辑AssemblyInfo.cs文件
+  展开解决方案管理器中项目的Properties文件夹，双击AssemblyInfo.cs文件。
+  将文件中多余信息删除，仅保留以下信息：
+    AssemblyTitle
+    AssemblyDescription
+    Guid
+    ComVisible
+    CLSCompliant
+  如果没有CLSCompliant，可以手动添加进去，然后为这些属性输入信息。
+  下面是XManagement项目的AssemblyInfo.cs文件内容，供参考：
+  /*----------------------------
+	using System;
+	using System.Reflection;
+	using System.Runtime.InteropServices;
+
+	[assembly: AssemblyTitle("XManagement")]
+	[assembly: AssemblyDescription("X Management System")]
+
+	// 如果此项目向 COM 公开，则下列 GUID 用于类型库的 ID
+	[assembly: Guid("cbdbc1e8-4384-45b6-b10a-e8c116822d20")]
+	[assembly: ComVisible(false)]
+	[assembly: CLSCompliant(true)]
+  ---------------------------- */
+2)为项目添加全局程序集信息引用
+  右键项目->添加->现有项，出现“添加现有项”窗口。
+  浏览到\proj\GlobalAssemblyInfo.cs文件，点击“添加”按钮的下拉箭头，选择“添加为链接”。
+  然后，将添加到项目中的GlobalAssemblyInfo.cs链接文件拖入Properties文件夹，
+  使它与AssemblyInfo.cs处于同一文件夹下。
+  
+  
+[五、修改项目命名空间和输出路径]
+a.命名空间
+  1)双击项目的Properties文件夹，进入项目的属性编辑界面
+  2)选择“应用程序”属性页
+  3)将“默认命名空间”改成“BobWei.XManagement”或者以它开头的其他命名空间
+  4)按Ctrl+S保存设置
+b.输出路径
+  如果是生成库的项目，不必修改输出路径，引用它的项目会自动将生成的副本拷贝到输出目录。
+  1)双击项目的Properties文件夹，进入项目的属性编辑界面
+  2)选择“生成”属性页
+  3)在“配置”列表里选择“Debug”，将下面的“输出路径”设置为“..\..\bin\Debug\<项目名>\”
+  4)在“配置”列表里选择“Release”，将下面的“输出路径”设置为“..\..\bin\Release\<项目名>\”
+  5)在“配置”列表里选择“活动(Debug)”。
+  6)按Ctrl+S保存设置
+
+
+[六、修改解决方案输出文件的产品名、版本等信息]
+双击GlobalAssemblyInfo.cs，对它的AssemblyProduct、AssemblyCompany、AssemblyCopyright进行修改，
+进它的RevisionClass类中的版本常量进行修改。
+
+
+[七、文件编码]
+所有文件的编码尽可能采用“UTF-8 Signature”。
+
+
+[八、公共变量]
+主程序的公共变量和配置信息以静态变量或者静态方法的形式声明在Configuration.cs文件里，
+初始化尽可能在Configuration的静态构造函数中完成。
+此静态类会在程序入口点处调用Configuration.Init()空的方法被初始化。
+主窗口的引用被StartProgram.cs的启动函数启动，并保存其引用为Configuration.MainForm。
+
+
+[九、调试输出]
+1.主程序的输出调试类ShellSingleton位于IO\Shell.cs文件中。
+  程序初始化时判断DEBUG编译标记，将它声明并引用在Configuration.Shell属性，
+  所有关于调试信息的输出，请使用此引用的WriteLine方法。
+  注意：使用此语句前判断DEBUG标记。
+2.Configuration.Shell.WriteLine()方法会输出调试信息到控制台窗口上。
+  控制台窗口只会出现在DEBUG模式下。
+  Shell.WriteLine()的输出信息中不必包含时间信息，时间信息被包装在WriteLine方法中，会自动输出；
+  输出的文字信息，以“警告”、“错误”、“注意”、“信息”开头则会显示为黄、红、绿、白四种不同的颜色显示，
+  其他文字信息的颜色为控制台缺省前景色的灰色显示。
+  由于配置了它的OutputFile属性，使得Shell.WriteLine()时会在shell.log目录下调试输出的产生日志文件。
+
+例子：在Configuration的静态构造函数里有一段创建日志文件夹的代码，如果创建失败，会输出警告。
+	/* ---------------------------
+		//创建日志目录
+		if (!Directory.Exists(logDir))
+		{
+			try
+			{
+				Directory.CreateDirectory(logDir);
+			}
+			catch (Exception ex)
+			{
+	#if DEBUG
+				Shell.WriteLine("警告：无法创建日志目录。" + ex.Message);
+	#endif
+			}
+		}
+	---------------------------- */
+3.主程序的崩溃信息有两种情况（此方法适合于Release版本）
+  a.主程序崩溃，记录了崩溃日志文件
+    会在log目录下产生
+  b.主程序崩溃，无法启动，不提示崩溃消息
+    缺少Common.dll文件
+    
+
+[十、程序启动和命令行参数]
+1.程序启动
+  a.主程序的入口点在Program.cs文件，是Program类的Main方法。
+    它支持参数传递和返回值。
+    如果程序在其他代码中退出，并要求有返回值信息，可以使用Environment.Exit(int)方法。
+  b.主程序的启动代码在StartProgram中，入口点函数Main会调用此类的Start方法
+  c.StartProgram.Start启动程序
+    1)会执行Configuration.Init()方法，初始化全部变量，保存程序启动时间，载入配置数据等操作；
+    2)会判断DEBUG编译模式，是否显示控制台窗口，以便利用Configuration.Shell.WriteLine方法输出调试信息；
+    3)会分析程序启动时传入的命令行参数；
+    4)在非DEBUG版本中（如Release）会注册监听应用程序异常和线程处理，程序崩溃时写入调试数据到日志文件，
+      日志文件通常在“log”目录下以“程序名.程序启动时间.log”格式命名的文本文件。
+2.命令行参数
+  命令行参数格式： /参数名[:参数值]
+  每个参数间以空格分隔
+  参数名以“/”开始
+  参数值为可选，跟随参数名以“:”开始
+  正在使用的参数见“命令行参数.txt”
+
+
+[十一、手动杀死程序]
+1.手动杀死程序有两种方法：
+  a.调用StartProgram.Crash方法
+    StartProgram.Crash(string msgboxText, string logText)
+  b.杀死主进程的语句
+    Process.GetCurrentProcess().Kill();
+2.建议采用第一种方法，它会将logText写入日志文件，然后将msgboxText消息显示给用户，提醒用户程序被异常关闭。
+  可以利用此方法从日志中获取系统资料。
+
+
+[十二、窗口风格]
+1.程序主窗口MainForm是MDI主窗口，子窗口按照DockPanel组件将它们分为两种风格：
+  a.文档窗口(DocumentWindow)
+    1)显示为文档界面窗口风格
+    2)标签栏提供关闭、关闭其他窗口菜单
+    3)只能在其他DocumentWindow中使用停靠功能
+    4)可通过主窗口的一些扩展的方法和属性得到文档窗口列表，激活窗口等功能
+  b.工具窗口(ToolWindow)
+    1)可以在工具窗口间停靠
+    2)可以被移到到主界面之外
+    3)可以停靠并隐藏在主界面的四周
+2.对话框窗口风格(DialogForm)
+  创建一个普通窗口，然后通过类似下面的代码使它具有对话框窗口风格和功能
+	/* ---------------------------
+		var df = (MyDialogForm)DialogForm.ApplyDialogStyle(new MyDialogForm());
+		DialogResult dr = df.ShowDialog();
+		df.Dispose();
+		if (dr == DialogResult.Cancel) return;//return
+	---------------------------- */	
+3.为了方便管理，约定窗口命名：
+  a.所有继承DocumentWindow窗口，命名为DummyXXXXXDoc
+    如 DummyReportDoc
+  b.所有继承ToolWindow窗口，命名为DummyXXXXXWindow
+    如 DummyFunctionTreeWindow
+  c.所有应用DialogForm或者继承DialogForm的窗口，命名为XXXXXForm
+    如 ConfigurationForm
+
+
+[十三、实用工具类、扩展方法、子命名空间]
+1.实用工具类
+  在BobWei.CSharp.Common.Utility命名空间下
+  a.提供文件功能的 FileUtility
+  b.提供图像处理功能的 GraphicsUtility
+  c.提供界面UI扩展功能的 GuiUtility
+  d.提供正则表达运算的 RegexUtility
+2.扩展方法
+  在BobWei.CSharp.Common命名空间下
+  a.提供一些常用方法的扩展 MyExtendMethod
+    例如：
+    1)IsEquals比较两个数组是否相同
+    2)FilterIt为字符串过滤掉一些字符
+    3)DesEncrypt用指定的key加密一个字符串
+    4)DesDecrypt用指定的key解密一个字符串
+    5)SplitIt将一个字符串按分隔符分隔成字符串数组
+    6)MergeIt将一个字符串数组按指定分隔符合并为一个字符串
+    7)ToMulitLineString将一个IList<string>转换成多行字符串
+    8)FormatTimeSpan格式化TimeSpan为时分秒的中文格式
+    9)FormatFileSizeWithoutUnit格式化表示文件大小的long型数据，返回结果不带有单位后缀
+    10)FormatFileSize格式化表示文件大小的long型数据  
+  b.其他的在这里补充
+3.子命名空间
+  BobWei.CSharp.Common.IO			文件读写，IO交互的功能
+  BobWei.CSharp.Common.Security		加密解密，安全相关
+  BobWei.CSharp.Common.Utility		实用工具
+
+
